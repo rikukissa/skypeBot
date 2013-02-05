@@ -4,5 +4,5 @@ class Module:
     self.moduleName = 'ping'
 
   def onMessage(self, msg):
-    if msg.Body is '!ping':
+    if msg.Body == '!ping':
       msg.Chat.SendMessage('pong')
