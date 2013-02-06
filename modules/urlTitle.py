@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import requests
-import BeautifulSoup
 import re
 
 class Module:
@@ -12,8 +11,10 @@ class Module:
     if re.match(self.urlRegex, msg.Body, re.IGNORECASE):
       try:
         r = requests.get(msg.Body)
-        if r.status_code == 200:
-          soup = BeautifulSoup.BeautifulSoup(r.text)
-          msg.Chat.SendMessage(soup.title.string)
-      except:
-        pass
+      except requests.RequestException:
+        print requests.RequestException.Message
+        return
+
+      title = re.search('<title>(.*?)</title>', r.text)
+      if title:
+        msg.Chat.SendMessage(title.group(1))
