@@ -3,11 +3,11 @@ import pymongo
 
 class Module:
   def __init__(self):
-    self.moduleName = 'saveToDatabase'
+    self.module_name = 'saveToDatabase'
     self.conn = pymongo.Connection('mongodb://localhost:27017')
     self.db = self.conn['skype']
 
-  def onMessage(self, msg):
+  def on_message(self, msg):
     self.db.messages.insert({
       'id': msg.Id,
       'timestamp': msg.Timestamp,

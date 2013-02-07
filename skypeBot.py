@@ -6,42 +6,42 @@ import os
 import imp
 import re
 
-def importModule(moduleName):
+def import_module(module_name):
   try:
-    module = imp.load_source('module', MODULE_PATH + moduleName + '.py')
-    loadedModules.append(module.Module())
+    module = imp.load_source('module', MODULE_PATH + module_name + '.py')
+    loaded_modules.append(module.Module())
     return True
   except IOError:
     return False
 
-def loadModule(msg, moduleName):
+def load_module(msg, module_name):
   if msg.FromHandle not in ADMINS:
     msg.Chat.SendMessage('Don\'t tell me what to do! (lalala)')
     return 
-  for module in loadedModules:
-    if module.moduleName == moduleName:
-      msg.Chat.SendMessage('Module ' + moduleName + ' is already loaded')
+  for module in loaded_modules:
+    if module.module_name == module_name:
+      msg.Chat.SendMessage('Module ' + module_name + ' is already loaded')
       return
-  if importModule(moduleName):
-    msg.Chat.SendMessage('Loaded module: ' + moduleName)
+  if import_module(module_name):
+    msg.Chat.SendMessage('Loaded module: ' + module_name)
   else:
-    msg.Chat.SendMessage('Couldn\'t load module: ' + moduleName)
+    msg.Chat.SendMessage('Couldn\'t load module: ' + module_name)
 
-def unloadModule(msg, moduleName):
-  for i in range(len(loadedModules)):
-    if loadedModules[i].moduleName == moduleName:
-      del loadedModules[i]
-      msg.Chat.SendMessage('Unloaded module: ' + moduleName)
+def unload_module(msg, module_name):
+  for i in range(len(loaded_modules)):
+    if loaded_modules[i].module_name == module_name:
+      del loaded_modules[i]
+      msg.Chat.SendMessage('Unloaded module: ' + module_name)
       return
-  msg.Chat.SendMessage('Module ' + moduleName + ' is not loaded')
+  msg.Chat.SendMessage('Module ' + module_name + ' is not loaded')
 
 def promote(msg, user):
   ADMINS.append(user)
   msg.Chat.SendMessage('User ' + user + ' is now an admin')
 # Load modules on startup
-loadedModules = []
+loaded_modules = []
 for module in LOAD_MODULES:
-  importModule(module)
+  import_module(module)
 
 class SkypeBot(object):   
   def __init__(self):
@@ -63,14 +63,13 @@ class SkypeBot(object):
         target(msg, *match.groups())
     
     # Transmit events to modules
-    for module in loadedModules:
+    for module in loaded_modules:
       if hasattr(module, 'onMessage'):
-        module.onMessage(msg)
-
+        module.on_message(msg)
 
   commands = {
-    '!loadModule (.+)': loadModule,
-    '!unloadModule (.+)': unloadModule,
+    '!loadModule (.+)': load_module,
+    '!unload_module (.+)': unload_module,
     '!promote (.+)': promote
   }
 

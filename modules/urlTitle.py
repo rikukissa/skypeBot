@@ -4,11 +4,11 @@ import re
 
 class Module:
   def __init__(self):
-    self.moduleName = 'urlTitle'
-    self.urlRegex = '(https?|ftp):\/\/(([\w\-]+\.)+[a-zA-Z]{2,6}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(\/([\w\-~.#\/?=&;:+%!*\[\]@$\()+,|\^]+)?)?'
+    self.module_name = 'urlTitle'
+    self.url_regex = '(https?|ftp):\/\/(([\w\-]+\.)+[a-zA-Z]{2,6}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?(\/([\w\-~.#\/?=&;:+%!*\[\]@$\()+,|\^]+)?)?'
 
-  def onMessage(self, msg):
-    if re.match(self.urlRegex, msg.Body, re.IGNORECASE):
+  def on_message(self, msg):
+    if re.match(self.url_regex, msg.Body, re.IGNORECASE):
       try:
         r = requests.get(msg.Body)
       except requests.RequestException:

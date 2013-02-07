@@ -21,38 +21,37 @@ class Question:
     self.question = question
     self.answer = answer
     self.id = index
-    self.sentTime = 0
-    self.hintsGiven = 0
-    self.hintSent = 0
-    self.maxHints = 4
+    self.sent_time = 0
+    self.hints_given = 0
+    self.hint_sent = 0
+    self.max_hints = 4
 
-  def isCorrect(self, answ, reset = True):
+  def is_correct(self, answ, reset=True):
     if answ.lower() == self.answer.lower():
       if reset:
-        self.hintsGiven = 0
+        self.hints_given = 0
       return True
     return False
 
-  def sendHint(self, chat):
-    if self.hintsGiven >= self.maxHints:
+  def send_hint(self, chat):
+    if self.hints_given >= self.max_hints:
       chat.SendMessage('Ei enempää vihjeitä.')
       return
-    if time.time() - self.hintSent < 10:
+    if time.time() - self.hint_sent < 10:
       chat.SendMessage('Viimeisestä vihjeestä on alle 10 sekuntia (facepalm)')
       return
 
-    self.hintsGiven += 1
-    charsVisible = int(math.floor(len(self.answer) / self.maxHints) * self.hintsGiven)
-    chat.SendMessage('Vihje: ' + self.answer[0:charsVisible])
-    self.hintSent = time.time()
+    self.hints_given += 1
+    chars_visible = int(math.floor(len(self.answer) / self.max_hints) * self.hints_given)
+    chat.SendMessage('Vihje: ' + self.answer[0:chars_visible])
+    self.hint_sent = time.time()
 
 class Module:
   def __init__(self):
-    self.moduleName = 'triviaBot'
-    
+    self.module_name = 'triviaBot'
     self.running = False
-    self.chatRoom = None
-    self.currentQuestion = None 
+    self.chat_room = None
+    self.current_question = None 
     self.players = []
 
     # Load questions
@@ -65,28 +64,28 @@ class Module:
       index += 1
       self.questions.append(Question(entry['q'], entry['a'], index))
 
-  def selectQuestion(self):
+  def select_question(self):
     index = random.randint(0, len(self.questions)) # Random index from questions list
     return self.questions[index]
 
-  def newQuestion(self):    
-    self.currentQuestion = self.selectQuestion()
-    self.currentQuestion.sentTime = time.time()
-    self.currentQuestion.hintSent = 0
-    self.sendQuestion()
+  def new_question(self):    
+    self.current_question = self.select_question()
+    self.current_question.sent_time = time.time()
+    self.current_question.hint_sent = 0
+    self.send_question()
 
-  def sendQuestion(self):
-    self.chatRoom.SendMessage('Kysymys ' + str(self.currentQuestion.id) + ': ' + self.currentQuestion.question)
+  def send_question(self):
+    self.chat_room.SendMessage('Kysymys ' + str(self.current_question.id) + ': ' + self.current_question.question)
 
-  def sendStats(self):
+  def send_stats(self):
     if len(self.players) == 0:
-      self.chatRoom.SendMessage('Kukaan ei ole vielä saanut pisteitä')   
+      self.chat_room.SendMessage('Kukaan ei ole vielä saanut pisteitä')   
       return
 
     for player in self.players:
-      self.chatRoom.SendMessage(player.username + ': ' + str(player.points))
+      self.chat_room.SendMessage(player.username + ': ' + str(player.points))
 
-  def getPlayer(self, username):
+  def get_player(self, username):
     for i in range(len(self.players)):
       if self.players[i].username == username:
         return self.players[i]
@@ -95,42 +94,42 @@ class Module:
     self.players.append(player)
     return player
 
-  def onMessage(self, msg):
+  def on_message(self, msg):
     if msg.Body == '!trivia start' and not self.running:
       self.running = True
       
-      if self.chatRoom is None:
-        self.chatRoom = msg.Chat # Get the correct chatroom from skype
+      if self.chat_room is None:
+        self.chat_room = msg.Chat # Get the correct chatroom from skype
       
-      self.chatRoom.SendMessage('Tervetuloa pelaamaan eeppistä Skype triviaa!')
-      self.newQuestion()
+      self.chat_room.SendMessage('Tervetuloa pelaamaan eeppistä Skype triviaa!')
+      self.new_question()
       return
 
     if self.running:
-      player = self.getPlayer(msg.FromHandle)
+      player = self.get_player(msg.FromHandle)
 
       if msg.Body == '!trivia stop':
         self.running = False
         return 
 
       if msg.Body == '!trivia stats':
-        self.sendStats()
+        self.send_stats()
         return
 
       if msg.Body == '!trivia next':
-        self.chatRoom.SendMessage('Kukaan ei arvannut oikeaa vastausta. Oikea vastaus oli: ' + self.currentQuestion.answer)
-        self.newQuestion()
+        self.chat_room.SendMessage('Kukaan ei arvannut oikeaa vastausta. Oikea vastaus oli: ' + self.current_question.answer)
+        self.new_question()
         return
       
       if msg.Body == '!trivia hint' or msg.Body == '!trivia vihje':
-        self.currentQuestion.sendHint(self.chatRoom)
+        self.current_question.send_hint(self.chat_room)
         return
 
-      if self.currentQuestion.isCorrect(msg.Body):
-        self.chatRoom.SendMessage(player.username + ' arvasi oikein! Oikea vastaus oli: ' + self.currentQuestion.answer)
+      if self.current_question.is_correct(msg.Body):
+        self.chat_room.SendMessage(player.username + ' arvasi oikein! Oikea vastaus oli: ' + self.current_question.answer)
         player.points += 1
-        self.newQuestion()
+        self.new_question()
         return
-      if time.time() - self.currentQuestion.sentTime > 60:
-        self.chatRoom.SendMessage('Kukaan ei arvannut oikeaa vastausta. Oikea vastaus oli: ' + self.currentQuestion.answer)
-        self.newQuestion()
+      if time.time() - self.current_question.sent_time > 60:
+        self.chat_room.SendMessage('Kukaan ei arvannut oikeaa vastausta. Oikea vastaus oli: ' + self.current_question.answer)
+        self.new_question()
