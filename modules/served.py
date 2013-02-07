@@ -4,5 +4,5 @@ class Module:
     self.module_name = 'served'
 
   def on_message(self, msg):
-    if msg.Body == 'ei mitää' || msg.Body == 'ei mitään':
+    if msg.Body == 'ei mitää' or msg.Body == 'ei mitään':
       msg.Chat.SendMessage('(*) SERVED (*)')
