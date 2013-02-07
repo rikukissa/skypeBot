@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 class Module:
   def __init__(self):
-    self.moduleName = 'ping'
+    self.module_name = 'ping'
 
   def on_message(self, msg):
     if msg.Body == '!ping':
