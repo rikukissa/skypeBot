@@ -64,7 +64,7 @@ class SkypeBot(object):
     
     # Transmit events to modules
     for module in loaded_modules:
-      if hasattr(module, 'onMessage'):
+      if hasattr(module, 'on_message'):
         module.on_message(msg)
 
   commands = {
